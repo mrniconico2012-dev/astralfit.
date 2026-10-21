@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f7faf7">
+<title>Astral Fit</title>
+<style>
+:root{--green:#24894c;--light:#e7f5e9;--bg:#f7faf7;--text:#193322;--muted:#718076;--border:#e4ebe5}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{max-width:1050px;margin:auto;padding:20px 18px 100px}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 0 24px}
+.brand{display:flex;align-items:center;gap:10px;font-size:23px;font-weight:800;letter-spacing:-1px}
+.logo{width:40px;height:40px;border-radius:14px;background:var(--light);display:grid;place-items:center}
+.logo svg{width:29px}
+.pill{border:1px solid var(--border);border-radius:30px;padding:9px 13px;background:white;font-size:13px}
+h1{font-size:clamp(30px,5vw,45px);letter-spacing:-1.7px;margin:8px 0 12px}
+h2{font-size:23px;letter-spacing:-.6px;margin:0 0 16px}
+h3{font-size:17px;margin:0 0 8px}
+p{line-height:1.6}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.hero{background:#e9f5eb;border-radius:25px;padding:30px;margin-bottom:24px;position:relative;overflow:hidden}
+.hero p{max-width:490px;color:#526b59}
+.hero .hero-mark{position:absolute;right:28px;top:32px;font-size:65px;font-weight:800;color:#d2e9d6}
+.btn{background:var(--green);color:white;border:0;border-radius:12px;padding:13px 18px;font-weight:700}
+.btn.secondary{background:white;color:var(--text);border:1px solid var(--border)}
+.btn.full{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.card{background:white;border:1px solid var(--border);border-radius:19px;padding:20px;margin-bottom:16px}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:25px 0 14px}
+label{display:block;font-size:13px;font-weight:700;margin:0 0 7px}
+input,select{width:100%;padding:13px;border:1px solid #dce5dd;border-radius:11px;background:white;color:var(--text);margin-bottom:14px}
+input:focus,select:focus{outline:2px solid #9ad2a6;border-color:var(--green)}
+.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.muscle{border:1px solid var(--border);border-radius:15px;padding:17px;background:white;text-align:left;color:var(--text);min-height:90px}
+.muscle.active{border:2px solid var(--green);background:#eff9f0}
+.muscle strong{display:block;margin-bottom:7px}
+.metric{font-size:28px;font-weight:800;margin:7px 0}
+.progress{height:8px;border-radius:10px;background:#e8eee9;overflow:hidden;margin:10px 0}
+.progress div{height:100%;width:0;background:var(--green);transition:width .2s}
+.exercise{padding:15px 0;border-bottom:1px solid var(--border)}
+.exercise:last-child{border:0}
+.exercise-top{display:flex;justify-content:space-between;gap:10px}
+.tag{font-size:11px;color:var(--green);background:var(--light);padding:6px 9px;border-radius:30px;white-space:nowrap}
+.exercise p{font-size:14px;color:var(--muted);margin:7px 0}
+.checkrow{display:flex;align-items:center;gap:9px;margin-top:10px;font-size:13px}
+.checkrow input{width:18px;margin:0}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fffffff2;border-top:1px solid var(--border);display:flex;justify-content:center;gap:5px;padding:10px;z-index:5;backdrop-filter:blur(12px)}
+.nav button{border:0;background:transparent;color:var(--muted);padding:10px 13px;border-radius:12px;font-size:12px;font-weight:700}
+.nav button.active{background:var(--light);color:var(--green)}
+.page{display:none}
+.page.active{display:block}
+.chatlog{height:290px;overflow:auto;border:1px solid var(--border);border-radius:14px;padding:13px;margin-bottom:12px;background:#fbfdfb}
+.message{padding:11px 13px;border-radius:13px;margin-bottom:9px;max-width:90%;font-size:14px;line-height:1.5;white-space:pre-wrap}
+.message.bot{background:#eaf5eb}
+.message.user{background:#e9edf9;margin-left:auto}
+.chatform{display:flex;gap:8px}
+.chatform input{margin:0;min-width:0}
+.empty{text-align:center;padding:30px 12px;color:var(--muted)}
+footer{text-align:center;color:var(--muted);font-size:12px;margin:25px 0}
+.hidden{display:none!important}
+a{color:var(--green)}
+@media(max-width:600px){
+ .app{padding:13px 13px 100px}
+ .hero{padding:23px}
+ .hero .hero-mark{font-size:42px;right:15px;top:18px}
+ .form-grid{grid-template-columns:1fr}
+ .grid{gap:10px}
+ .card{padding:16px}
+ .nav{gap:0}
+ .nav button{padding:10px 9px;font-size:11px}
+ .brand{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand">
+    <div class="logo">
+      <svg viewBox="0 0 40 40" fill="none" aria-label="Logo Astral Fit">
+        <path d="M20 31S6 23 6 14.5C6 6 17 5 20 13c3-8 14-7 14 1.5C34 23 20 31 20 31Z" stroke="#24894c" stroke-width="3" stroke-linejoin="round"/>
+        <ellipse cx="20" cy="20" rx="18" ry="6.5" transform="rotate(-25 20 20)" stroke="#24894c" stroke-width="2.5"/>
+      </svg>
+    </div>
+    <span>Astral Fit</span>
+  </div>
+  <button class="pill" onclick="showPage('profile')">Mi perfil</button>
+</header>
+
+<main>
+<section class="page active" id="home">
+  <div class="hero">
+    <div class="hero-mark">AF</div>
+    <p class="small"><strong>TU ESPACIO DE ENTRENAMIENTO</strong></p>
+    <h1>Listo para el entrenamiento de hoy</h1>
+    <p>Avanza a tu ritmo, crea hábitos y registra tus entrenamientos en un solo lugar.</p>
+    <button class="btn" onclick="showPage('routine')">Comenzar entrenamiento →</button>
+  </div>
+
+  <div class="section-head"><h2>Tu resumen</h2></div>
+  <div class="grid">
+    <div class="card">
+      <span class="muted small">Entrenamientos registrados</span>
+      <div class="metric" id="totalWorkouts">0</div>
+      <span class="muted small">Sesiones completadas</span>
+    </div>
+    <div class="card">
+      <span class="muted small">Ejercicios completados</span>
+      <div class="metric" id="totalExercises">0</div>
+      <span class="muted small">En tus sesiones</span>
+    </div>
+  </div>
+
+  <div class="section-head"><h2>Tu próximo paso</h2></div>
+  <div class="card">
+    <h3 id="homeGoal">Empieza por tu perfil</h3>
+    <p class="muted small" id="homeTip">Añade tus datos para personalizar tu experiencia.</p>
+    <button class="btn secondary" onclick="showPage('profile')">Configurar mi perfil</button>
+  </div>
+</section>
+
+<section class="page" id="routine">
+  <div class="section-head"><h2>Tu entrenamiento</h2></div>
+  <div class="card">
+    <h3>1. Elige una zona</h3>
+    <p class="muted small">Selecciona qué parte del cuerpo quieres entrenar.</p>
+    <div class="grid" id="muscles">
+      <button class="muscle active" data-muscle="pecho" onclick="chooseMuscle('pecho')"><strong>Pecho</strong><span class="muted small">Empuje y control</span></button>
+      <button class="muscle" data-muscle="espalda" onclick="chooseMuscle('espalda')"><strong>Espalda</strong><span class="muted small">Tracción y postura</span></button>
+      <button class="muscle" data-muscle="piernas" onclick="chooseMuscle('piernas')"><strong>Piernas</strong><span class="muted small">Fuerza y estabilidad</span></button>
+      <button class="muscle" data-muscle="abdominales" onclick="chooseMuscle('abdominales')"><strong>Abdominales</strong><span class="muted small">Control del tronco</span></button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>2. Cuéntanos tu experiencia</h3>
+    <label for="lastDate">Último entrenamiento de esta zona</label>
+    <input id="lastDate" type="date">
+    <label for="experience">Tu experiencia</label>
+    <select id="experience">
+      <option value="principiante">Estoy empezando</option>
+      <option value="intermedio">Ya entreno habitualmente</option>
+      <option value="avanzado">Tengo bastante experiencia</option>
+    </select>
+    <label for="equipment">Material disponible</label>
+    <select id="equipment">
+      <option value="casa">Solo peso corporal</option>
+      <option value="mancuernas">Mancuernas</option>
+      <option value="gimnasio">Gimnasio completo</option>
+    </select>
+    <label for="goal">Objetivo principal</label>
+    <select id="goal">
+      <option value="habito">Crear un hábito saludable</option>
+      <option value="fuerza">Mejorar mi fuerza</option>
+      <option value="resistencia">Mejorar mi resistencia</option>
+      <option value="tecnica">Aprender la técnica</option>
+    </select>
+    <button class="btn full" onclick="generateRoutine()">Preparar mi rutina</button>
+  </div>
+
+  <div class="card hidden" id="routineResult">
+    <div class="section-head">
+      <div><span class="tag">TU PROPUESTA</span><h2 id="routineTitle" style="margin-top:12px">Rutina</h2></div>
+    </div>
+    <p class="muted small" id="routineInfo"></p>
+    <div class="progress"><div id="routineProgress"></div></div>
+    <p class="small muted" id="progressText">0 ejercicios completados</p>
+    <div id="exerciseList"></div>
+    <button class="btn full" onclick="finishWorkout()">Guardar entrenamiento completado</button>
+    <p class="small muted">Detente si sientes dolor, mareo o malestar. Prioriza la técnica y el descanso.</p>
+  </div>
+</section>
+
+<section class="page" id="progress">
+  <div class="section-head"><h2>Tu progreso</h2></div>
+  <div class="grid">
+    <div class="card"><span class="muted small">Sesiones</span><div class="metric" id="progressSessions">0</div></div>
+    <div class="card"><span class="muted small">Ejercicios marcados</span><div class="metric" id="progressExercises">0</div></div>
+  </div>
+  <div class="card">
+    <h3>Historial</h3>
+    <div id="history"><div class="empty">Todavía no hay entrenamientos guardados.</div></div>
+    <button class="btn secondary" onclick="exportData()">Exportar mis datos</button>
+  </div>
+  <div class="card">
+    <h3>Registro manual</h3>
+    <p class="muted small">Añade una sesión que hiciste fuera de la aplicación.</p>
+    <label for="manualName">Actividad</label>
+    <input id="manualName" placeholder="Ej. Entrenamiento de piernas">
+    <label for="manualMinutes">Duración aproximada (minutos)</label>
+    <input id="manualMinutes" type="number" min="1" max="600" placeholder="30">
+    <button class="btn" onclick="addManual()">Guardar registro</button>
+  </div>
+</section>
+
+<section class="page" id="assistant">
+  <div class="section-head"><h2>Asistente Astral</h2></div>
+  <div class="card">
+    <p class="muted small">Consulta orientación general sobre ejercicios, técnica, descanso y hábitos saludables.</p>
+    <div class="chatlog" id="chatlog">
+      <div class="message bot">¡Hola! Soy el asistente básico de Astral Fit. ¿En qué puedo ayudarte con tu entrenamiento?</div>
+    </div>
+    <div class="chatform">
+      <input id="chatInput" placeholder="Escribe tu pregunta..." maxlength="500">
+      <button class="btn" onclick="sendMessage()">Enviar</button>
+    </div>
+    <p class="muted small">Esta versión ofrece respuestas predefinidas, no utiliza un modelo de IA conectado.</p>
+  </div>
+  <div class="card">
+    <h3>Consultas frecuentes</h3>
+    <p><a href="#" onclick="quickAsk('¿Cómo caliento antes de entrenar?');return false">¿Cómo caliento antes de entrenar?</a></p>
+    <p><a href="#" onclick="quickAsk('¿Cuánto debo descansar?');return false">¿Cuánto debo descansar?</a></p>
+    <p><a href="#" onclick="quickAsk('¿Cómo mejoro mi técnica?');return false">¿Cómo mejoro mi técnica?</a></p>
+  </div>
+</section>
+
+<section class="page" id="profile">
+  <div class="section-head"><h2>Mi perfil</h2></div>
+  <div class="card">
+    <p class="muted small">Estos datos se guardan en este navegador. No se envían a un servidor.</p>
+    <label for="age">Edad</label>
+    <input id="age" type="number" min="13" max="110" placeholder="Edad">
+    <div class="form-grid">
+      <div><label for="weight">Peso (kg)</label><input id="weight" type="number" min="1" max="500" step="0.1" placeholder="kg"></div>
+      <div><label for="height">Estatura (cm)</label><input id="height" type="number" min="50" max="260" placeholder="cm"></div>
+      <div><label for="profileGoal">Objetivo</label><select id="profileGoal"><option>Salud general</option><option>Fuerza</option><option>Resistencia</option><option>Aprender técnica</option><option>Crear hábito</option></select></div>
+    </div>
+    <button class="btn full" onclick="saveProfile()">Guardar perfil</button>
+    <p id="profileStatus" class="muted small"></p>
+  </div>
+  <div class="card">
+    <h3>Privacidad y datos</h3>
+    <p class="muted small">Los datos se guardan localmente en este navegador. Si borras los datos del sitio o cambias de dispositivo, podrías perderlos. No introduzcas información médica sensible.</p>
+    <button class="btn secondary" onclick="clearAll()">Borrar los datos guardados</button>
+  </div>
+</section>
+</main>
+<footer>Astral Fit · Entrena a tu ritmo · Cuida tu bienestar</footer>
+</div>
+
+<nav class="nav" aria-label="Navegación principal">
+  <button class="active" data-page="home" onclick="showPage('home')">Inicio</button>
+  <button data-page="routine" onclick="showPage('routine')">Rutina</button>
+  <button data-page="progress" onclick="showPage('progress')">Progreso</button>
+  <button data-page="assistant" onclick="showPage('assistant')">Asistente</button>
+</nav>
+
+<script>
+const KEY='astralFitSingleV1';
+const blankData=()=>({profile:{},sessions:[],manual:[]});
+let data=loadData();
+let selectedMuscle='pecho';
+let currentExercises=[];
+let completed=new Set();
+
+const routines={
+pecho:[
+{name:'Flexiones adaptadas',sets:'2 series de 6–10',how:'Apoya las manos en una pared o superficie firme. Mantén el cuerpo alineado, flexiona los codos y vuelve a empujar sin bloquearlos.',equipment:'Pared, mesa firme o suelo',video:'https://www.youtube.com/results?search_query=flexiones+tecnica+correcta+principiantes'},
+{name:'Press de pecho ligero',sets:'2 series de 8–12',how:'Si tienes mancuernas adecuadas, túmbate en un banco estable, baja con control y empuja sin arquear excesivamente la espalda.',equipment:'Mancuernas y banco estable; opcional',video:'https://www.youtube.com/results?search_query=press+de+pecho+tecnica+correcta'},
+{name:'Flexiones escapulares',sets:'2 series de 8–12',how:'Con brazos extendidos y cuerpo alineado, deja que los omóplatos se acerquen suavemente y luego separa las escápulas.',equipment:'Pared o suelo',video:'https://www.youtube.com/results?search_query=flexiones+escapulares+tecnica'}
+],
+espalda:[
+{name:'Remo con mochila ligera',sets:'2 series de 8–12',how:'Inclina ligeramente el torso con la espalda neutra. Lleva la mochila hacia las costillas y bájala lentamente.',equipment:'Mochila ligera bien cerrada',video:'https://www.youtube.com/results?search_query=remo+con+mancuerna+tecnica+correcta'},
+{name:'Bird dog',sets:'2 series de 6 por lado',how:'A cuatro apoyos, extiende el brazo y la pierna contrarios sin girar la cadera. Mantén el movimiento lento.',equipment:'Esterilla opcional',video:'https://www.youtube.com/results?search_query=bird+dog+ejercicio+tecnica'},
+{name:'Retracción escapular',sets:'2 series de 10',how:'De pie, lleva suavemente los hombros atrás y abajo, sin encogerlos ni forzar el cuello.',equipment:'Ninguno',video:'https://www.youtube.com/results?search_query=retraccion+escapular+ejercicio'}
+],
+piernas:[
+{name:'Sentadilla a una silla',sets:'2 series de 8–12',how:'Separa los pies a una anchura cómoda. Lleva la cadera atrás, toca suavemente la silla y vuelve a levantarte con control.',equipment:'Silla estable',video:'https://www.youtube.com/results?search_query=sentadilla+a+silla+tecnica+correcta'},
+{name:'Puente de glúteos',sets:'2 series de 10–12',how:'Túmbate boca arriba con las rodillas flexionadas. Eleva la cadera apretando los glúteos sin arquear la zona lumbar.',equipment:'Esterilla opcional',video:'https://www.youtube.com/results?search_query=puente+gluteos+tecnica'},
+{name:'Elevación de talones',sets:'2 series de 10–15',how:'De pie y con apoyo cercano, eleva los talones lentamente y desciende sin rebotar.',equipment:'Pared o silla para apoyarte',video:'https://www.youtube.com/results?search_query=elevacion+talones+tecnica'}
+],
+abdominales:[
+{name:'Dead bug',sets:'2 series de 6 por lado',how:'Túmbate boca arriba. Extiende despacio una pierna y el brazo contrario, manteniendo la espalda en una posición cómoda y controlada.',equipment:'Esterilla opcional',video:'https://www.youtube.com/results?search_query=dead+bug+ejercicio+tecnica'},
+{name:'Plancha inclinada',sets:'2 series de 15–25 segundos',how:'Apoya los antebrazos en una superficie firme y elevada. Mantén el cuerpo alineado y respira con normalidad.',equipment:'Mesa o banco muy estable',video:'https://www.youtube.com/results?search_query=plancha+inclinada+tecnica'},
+{name:'Bird dog',sets:'2 series de 6 por lado',how:'Desde cuatro apoyos, extiende brazo y pierna contrarios manteniendo estable el tronco.',equipment:'Esterilla opcional',video:'https://www.youtube.com/results?search_query=bird+dog+ejercicio+tecnica'}
+]
+};
+
+function loadData(){
+ try{return {...blankData(),...JSON.parse(localStorage.getItem(KEY)||'{}')}}
+ catch(e){return blankData()}
+}
+function persist(){
+ try{localStorage.setItem(KEY,JSON.stringify(data));return true}
+ catch(e){alert('No se pudieron guardar los datos en este navegador.');return false}
+}
+function showPage(id){
+ document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
+ window.scrollTo({top:0,behavior:'smooth'});
+ if(id==='progress')renderProgress();
+ if(id==='profile')fillProfile();
+ if(id==='home')renderHome();
+}
+function chooseMuscle(m){
+ selectedMuscle=m;
+ document.querySelectorAll('.muscle').forEach(b=>b.classList.toggle('active',b.dataset.muscle===m));
+}
+function generateRoutine(){
+ currentExercises=routines[selectedMuscle].map(x=>({...x}));
+ completed=new Set();
+ document.getElementById('routineResult').classList.remove('hidden');
+ document.getElementById('routineTitle').textContent='Rutina de '+selectedMuscle;
+ const level=document.getElementById('experience').value;
+ const gear=document.getElementById('equipment').value;
+ document.getElementById('routineInfo').textContent=
+ 'Nivel: '+level+'. Material: '+({'casa':'peso corporal','mancuernas':'mancuernas','gimnasio':'gimnasio'}[gear])+'. Empieza con calma y descansa entre series.';
+ document.getElementById('exerciseList').innerHTML=currentExercises.map((e,i)=>`
+ <div class="exercise">
+  <div class="exercise-top"><h3>${i+1}. ${e.name}</h3><span class="tag">${e.sets}</span></div>
+  <p><strong>Cómo hacerlo:</strong> ${e.how}</p>
+  <p><strong>Material:</strong> ${e.equipment}</p>
+  <p><a href="${e.video}" target="_blank" rel="noopener noreferrer">Ver explicaciones en YouTube ↗</a></p>
+  <label class="checkrow"><input type="checkbox" onchange="toggleExercise(${i},this.checked)"> Marcar como completado</label>
+ </div>`).join('');
+ updateRoutineProgress();
+ document.getElementById('routineResult').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function toggleExercise(i,checked){
+ if(checked)completed.add(i);else completed.delete(i);
+ updateRoutineProgress();
+}
+function updateRoutineProgress(){
+ const total=currentExercises.length;
+ const count=completed.size;
+ document.getElementById('routineProgress').style.width=(total?count/total*100:0)+'%';
+ document.getElementById('progressText').textContent=count+' de '+total+' ejercicios completados';
+}
+function finishWorkout(){
+ if(!currentExercises.length){alert('Primero prepara una rutina.');return}
+ if(completed.size===0&&!confirm('No has marcado ningún ejercicio. ¿Quieres guardar igualmente la sesión?'))return;
+ data.sessions.push({date:new Date().toISOString(),muscle:selectedMuscle,exercises:completed.size,total:currentExercises.length});
+ persist();renderHome();renderProgress();
+ alert('Sesión guardada en este navegador.');
+}
+function saveProfile(){
+ const age=Number(document.getElementById('age').value);
+ const weight=Number(document.getElementById('weight').value);
+ const height=Number(document.getElementById('height').value);
+ if(!age||age<13||age>110){alert('Introduce una edad válida (13–110).');return}
+ if(!weight||weight<1||weight>500){alert('Introduce un peso válido.');return}
+ if(!height||height<50||height>260){alert('Introduce una estatura válida.');return}
+ data.profile={age,weight,height,goal:document.getElementById('profileGoal').value};
+ persist();
+ document.getElementById('profileStatus').textContent='Perfil guardado en este navegador.';
+ renderHome();
+}
+function fillProfile(){
+ const p=data.profile||{};
+ document.getElementById('age').value=p.age||'';
+ document.getElementById('weight').value=p.weight||'';
+ document.getElementById('height').value=p.height||'';
+ if(p.goal)document.getElementById('profileGoal').value=p.goal;
+}
+function renderHome(){
+ document.getElementById('totalWorkouts').textContent=data.sessions.length+data.manual.length;
+ document.getElementById('totalExercises').textContent=data.sessions.reduce((s,x)=>s+(x.exercises||0),0);
+ const p=data.profile||{};
+ document.getElementById('homeGoal').textContent=p.age?'¡Vamos a por tu próxima sesión!':'Empieza por tu perfil';
+ document.getElementById('homeTip').textContent=p.age?'Tu objetivo: '+(p.goal||'salud general')+'. Escucha a tu cuerpo y progresa gradualmente.':'Añade tus datos para personalizar tu experiencia.';
+}
+function renderProgress(){
+ document.getElementById('progressSessions').textContent=data.sessions.length+data.manual.length;
+ document.getElementById('progressExercises').textContent=data.sessions.reduce((s,x)=>s+(x.exercises||0),0);
+ const all=[
+ ...data.sessions.map(x=>({date:x.date,name:'Rutina de '+x.muscle,detail:(x.exercises||0)+' ejercicios completados'})),
+ ...data.manual.map(x=>({date:x.date,name:x.name,detail:x.minutes+' minutos · registro manual'}))
+ ].sort((a,b)=>new Date(b.date)-new Date(a.date));
+ document.getElementById('history').innerHTML=all.length?all.map(x=>`
+ <div class="exercise"><strong>${escapeHTML(x.name)}</strong>
+ <p>${new Date(x.date).toLocaleDateString('es-ES')} · ${escapeHTML(x.detail)}</p></div>`).join(''):'<div class="empty">Todavía no hay entrenamientos guardados.</div>';
+}
+function addManual(){
+ const name=document.getElementById('manualName').value.trim();
+ const minutes=Number(document.getElementById('manualMinutes').value);
+ if(!name){alert('Escribe el nombre de la actividad.');return}
+ if(!minutes||minutes<1||minutes>600){alert('Introduce una duración válida.');return}
+ data.manual.push({date:new Date().toISOString(),name,minutes});
+ persist();
+ document.getElementById('manualName').value='';
+ document.getElementById('manualMinutes').value='';
+ renderProgress();renderHome();
+ alert('Registro guardado.');
+}
+function escapeHTML(s){
+ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function exportData(){
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');a.href=url;a.download='astral-fit-datos.json';a.click();
+ URL.revokeObjectURL(url);
+}
+function clearAll(){
+ if(!confirm('¿Seguro que quieres borrar el perfil y todo el historial guardado en este navegador?'))return;
+ data=blankData();persist();renderHome();renderProgress();fillProfile();
+ document.getElementById('profileStatus').textContent='Datos borrados.';
+}
+function addMessage(text,type){
+ const el=document.createElement('div');
+ el.className='message '+type;el.textContent=text;
+ const log=document.getElementById('chatlog');log.appendChild(el);log.scrollTop=log.scrollHeight;
+}
+function getAnswer(q){
+ const s=q.toLowerCase();
+ if(/calent|calentar/.test(s))return 'Empieza con 5–10 minutos de movimiento suave y movilidad cómoda de las articulaciones. Después, practica el movimiento del ejercicio sin carga antes de aumentar la dificultad.';
+ if(/descans|reposo/.test(s))return 'Descansa lo suficiente entre series para mantener una buena técnica. Alterna los grupos musculares y evita entrenar intensamente la misma zona si todavía estás muy fatigado.';
+ if(/tecnic|hacer.*bien|postura/.test(s))return 'Prioriza movimientos lentos y controlados, sin forzar el rango de movimiento. Empieza con una variante fácil y detente si sientes dolor. Puedes consultar las demostraciones enlazadas en cada ejercicio.';
+ if(/dolor|lesion|mare|enferm/.test(s))return 'Detén el ejercicio si sientes dolor, mareo o malestar. Cuéntaselo a un adulto de confianza y consulta a un profesional sanitario si persiste o te preocupa.';
+ if(/rutina|empez|principiant/.test(s))return 'Empieza con una rutina sencilla, aprende la técnica y deja tiempo para recuperarte. Puedes elegir una zona en la pestaña Rutina y adaptar el material disponible.';
+ if(/comer|dieta|peso|adelgaz|suplement/.test(s))return 'La alimentación debe ser suficiente y variada para apoyar tu energía y crecimiento. No necesitas dietas extremas ni suplementos para empezar a entrenar. Si tienes dudas específicas, consulta a un profesional sanitario.';
+ if(/musculo|fuerza|progres/.test(s))return 'La mejora llega con constancia, buena técnica, descanso y progresión gradual. Anota tus sesiones y aumenta la dificultad solo cuando controles bien el movimiento.';
+ return 'Puedo ofrecer orientación general sobre calentamiento, técnica, descanso y hábitos saludables. Prueba a preguntar: «¿Cómo caliento?» o «¿Cómo mejoro mi técnica?». Esta versión aún no está conectada a una IA real.';
+}
+function sendMessage(){
+ const input=document.getElementById('chatInput');
+ const q=input.value.trim();if(!q)return;
+ addMessage(q,'user');input.value='';
+ setTimeout(()=>addMessage(getAnswer(q),'bot'),150);
+}
+function quickAsk(q){showPage('assistant');document.getElementById('chatInput').value=q;sendMessage()}
+document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage()});
+renderHome();renderProgress();fillProfile();
+</script>
+</body>
+</html>
